@@ -108,7 +108,8 @@ contract MicroDAO is ERC20 {
     uint count = countSignatures(signatures);
     for (uint i = 0; i < count; i++) {
       (v, r, s) = parseSignature(signatures, i);
-      address addr = ecrecover(proposal, v, r, s);
+      bytes32 prefixedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", proposal));
+      address addr = ecrecover(prefixedHash, v, r, s);
       require(addr != address(0), "address cannot be 0");
       shares += balanceOf(addr);
     }
