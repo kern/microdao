@@ -14,7 +14,7 @@ contract MicroDAOFactory {
   ) public returns (MicroDAO dao) {
     bytes memory deploymentData = type(MicroDAO).creationCode;
 
-    bytes32 salt = keccak256(abi.encodePacked(name, symbol, addresses, shares));
+    bytes32 salt = keccak256(abi.encodePacked(address(this), name, symbol, addresses, shares));
 
     assembly {
       dao := create2(0, add(deploymentData, 0x20), mload(deploymentData), salt)
