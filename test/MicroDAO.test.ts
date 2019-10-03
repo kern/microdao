@@ -53,7 +53,7 @@ describe('MicroDAO', () => {
     await dao.init("MicroDAO", "MDAO", [wallet.address, walletTo.address], [1, 1], 1, 2)
 
     const proposal = await dao.createProposalSplitShares(3)
-    const signatures = await wallet.signMessage(ethersUtils.arrayify(proposal.toString()))
+    const signatures = await wallet.signMessage(ethersUtils.hashMessage(ethersUtils.arrayify(proposal.toString()))) // TODO(@kern): Fix me
 
     await dao.splitShares(3, signatures);
     expect(await dao.balanceOf(wallet.address)).to.eq(3);
