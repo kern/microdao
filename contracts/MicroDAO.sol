@@ -18,13 +18,17 @@ contract MicroDAO is ERC20 {
     string memory name,
     string memory symbol,
     address[] memory addresses,
-    uint256[] memory shares
+    uint256[] memory shares,
+    uint256 minSharesSplitShares,
+    uint256 minSharesSafeTransferFrom
   ) public {
     require(!_initialized, "can only initialize once");
     _initialized = true;
 
     _name = name;
     _symbol = symbol;
+    _minSharesSplitShares = minSharesSplitShares;
+    _minSharesSafeTransferFrom = minSharesSafeTransferFrom;
 
     uint256 addrsLen = addresses.length;
     require(
@@ -56,7 +60,10 @@ contract MicroDAO is ERC20 {
       signatures
     );
 
-    // TODO(@kern): Implement me
+    // TODO(@kern): Mint shares for every owner
+    // TODO(@kern): Use SafeMath.sol
+    _minSharesSafeTransferFrom *= multiple;
+    _minSharesSplitShares *= multiple;
   }
 
   function safeTransferFrom(IERC20 token, address from, address to, uint256 value, bytes memory signatures) public {
@@ -94,7 +101,7 @@ contract MicroDAO is ERC20 {
     );
   }
 
-  function tallyShares(bytes32 proposal, bytes memory signatures) public returns (uint256 shares) {
+  function tallyShares(bytes32 proposal, bytes memory signatures) public view returns (uint256 shares) {
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -107,7 +114,7 @@ contract MicroDAO is ERC20 {
     }
   }
 
-  function verifySufficientShares(uint256 minShares, bytes32 proposal, bytes memory signatures) private {
+  function verifySufficientShares(uint256 minShares, bytes32 proposal, bytes memory signatures) private view {
     require(
       tallyShares(proposal, signatures) >= minShares,
       "must have minimum shares"
