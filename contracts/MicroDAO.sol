@@ -9,17 +9,8 @@ contract MicroDAO is ERC20, ERC20Detailed {
   uint256 public minSharesSplitShares;
   uint256 public minSharesSafeTransferFrom;
 
-  struct InitialProposal {
-    address[] addresses;
-    uint256[] shares;
-  }
-
-  constructor(InitialProposal memory initialProposal) ERC20() ERC20Detailed("MicroDAO", "MDAO", 1) public {
+  constructor() ERC20() ERC20Detailed("MicroDAO", "MDAO", 1) public {
     // initMicroDAO(initializer);
-  }
-
-  function initMicroDAO(InitialProposal memory initialProposal) private {
-    // TODO(@kern): Implement me
   }
 
   function splitShares(uint256 multiple, bytes memory signatures) public {
