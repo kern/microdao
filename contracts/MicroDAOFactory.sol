@@ -11,8 +11,7 @@ contract MicroDAOFactory {
     string memory symbol,
     address[] memory addresses,
     uint256[] memory shares,
-    uint256 minSharesSplitShares,
-    uint256 minSharesSafeTransferFrom
+    uint256 minSharesTransfer
   ) public returns (MicroDAO dao) {
     bytes memory deploymentData = type(MicroDAO).creationCode;
 
@@ -25,7 +24,7 @@ contract MicroDAOFactory {
       }
     }
 
-    dao.init(name, symbol, addresses, shares, minSharesSplitShares, minSharesSafeTransferFrom);
+    dao.init(name, symbol, addresses, shares, minSharesTransfer);
 
     emit CreatedMicroDAO(dao);
   }

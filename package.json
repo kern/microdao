@@ -22,12 +22,14 @@
   "devDependencies": {
     "@nomiclabs/buidler": "^1.0.1",
     "@nomiclabs/buidler-ethers": "^1.0.1",
+    "@nomiclabs/buidler-web3": "^1.0.1",
     "@types/chai": "^4.2.3",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.9",
     "chai": "^4.2.0",
     "ethereum-waffle": "^2.1.0",
     "ts-node": "^8.4.1",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.3",
+    "web3": "^1.2.1"
   }
 }

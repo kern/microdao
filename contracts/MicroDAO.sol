@@ -2,14 +2,16 @@ pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 contract MicroDAO is ERC20 {
+  using SafeERC20 for IERC20;
+
   bool private _initialized;
   string private _name;
   string private _symbol;
   uint256 private _nonce;
-  uint256 private _minSharesSplitShares;
-  uint256 private _minSharesSafeTransferFrom;
+  uint256 private _minSharesTransfer;
 
   constructor() ERC20() public {
   }
@@ -19,16 +21,14 @@ contract MicroDAO is ERC20 {
     string memory symbol,
     address[] memory addresses,
     uint256[] memory shares,
-    uint256 minSharesSplitShares,
-    uint256 minSharesSafeTransferFrom
+    uint256 minSharesTransfer
   ) public {
     require(!_initialized, "can only initialize once");
     _initialized = true;
 
     _name = name;
     _symbol = symbol;
-    _minSharesSplitShares = minSharesSplitShares;
-    _minSharesSafeTransferFrom = minSharesSafeTransferFrom;
+    _minSharesTransfer = minSharesTransfer;
 
     uint256 addrsLen = addresses.length;
     require(
@@ -53,30 +53,40 @@ contract MicroDAO is ERC20 {
     return 0;
   }
 
-  function splitShares(uint256 multiple, bytes memory signatures) public {
+  function safeTransfer(IERC20 token, address to, uint256 value, bytes memory signatures) public {
     verifySufficientShares(
-      _minSharesSafeTransferFrom,
-      createProposalSplitShares(multiple),
+      _minSharesTransfer,
+      createProposalSafeTransfer(token, to, value),
       signatures
     );
 
-    // TODO(@kern): Mint shares for every owner
-    // TODO(@kern): Use SafeMath.sol
-    _minSharesSafeTransferFrom *= multiple;
-    _minSharesSplitShares *= multiple;
+    token.safeTransfer(to, value);
   }
 
   function safeTransferFrom(IERC20 token, address from, address to, uint256 value, bytes memory signatures) public {
     verifySufficientShares(
-      _minSharesSafeTransferFrom,
+      _minSharesTransfer,
       createProposalSafeTransferFrom(token, from, to, value),
       signatures
     );
 
-    // TODO(@kern): Implement me
+    token.safeTransferFrom(from, to, value);
   }
 
-  function createProposalSafeTransferFrom(IERC20 token, address from, address to, uint256 value) public view returns (bytes32 proposal) {
+  function createProposalSafeTransfer(IERC20 token, address to, uint256 value) public view returns (bytes32) {
+    return keccak256(
+      abi.encodePacked(
+        address(this),
+        _nonce,
+        this.safeTransfer.selector,
+        address(token),
+        to,
+        value
+      )
+    );
+  }
+
+  function createProposalSafeTransferFrom(IERC20 token, address from, address to, uint256 value) public view returns (bytes32) {
     return keccak256(
       abi.encodePacked(
         address(this),
@@ -90,39 +100,30 @@ contract MicroDAO is ERC20 {
     );
   }
 
-  function createProposalSplitShares(uint256 multiple) public view returns (bytes32 proposal) {
-    return keccak256(
-      abi.encodePacked(
-        address(this),
-        _nonce,
-        this.splitShares.selector,
-        multiple
-      )
-    );
-  }
-
   function tallyShares(bytes32 proposal, bytes memory signatures) public view returns (uint256 shares) {
     uint8 v;
     bytes32 r;
     bytes32 s;
+    bytes32 prefixedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", proposal));
+
     uint count = countSignatures(signatures);
     for (uint i = 0; i < count; i++) {
       (v, r, s) = parseSignature(signatures, i);
-      bytes32 prefixedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", proposal));
       address addr = ecrecover(prefixedHash, v, r, s);
       require(addr != address(0), "address cannot be 0");
 
-      uint256 addShares = balanceOf(addr);
-      require(addShares > 0, "shares must be greater than 0");
-      shares += addShares;
+      uint256 addrShares = balanceOf(addr);
+      require(addrShares > 0, "shares must be greater than 0 for address");
+      shares += addrShares;
     }
   }
 
-  function verifySufficientShares(uint256 minShares, bytes32 proposal, bytes memory signatures) private view {
+  function verifySufficientShares(uint256 minShares, bytes32 proposal, bytes memory signatures) private {
     require(
       tallyShares(proposal, signatures) >= minShares,
       "must have minimum shares"
     );
+    _nonce++;
   }
 
   /// @notice Counts the number of signatures in a signatures bytes array. Returns 0 if the length is invalid.
