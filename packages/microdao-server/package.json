@@ -1,10 +1,9 @@
 {
   "name": "@kern/microdao-server",
-  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "dist/src/index.js",
-  "license": "UNLICENSED",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "@strv/heimdall": "^1.0.2",
     "apollo-server-koa": "^2.9.3",
@@ -16,7 +15,6 @@
     "mime-types": "^2.1.24",
     "node-fetch": "^2.6.0",
     "pg": "^7.12.1",
-    "phone": "^2.3.21",
     "ramda": "^0.26.1",
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.13",
@@ -27,7 +25,6 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@types/crc": "^3.4.0",
     "@types/dotenv": "^6.1.1",
     "@types/faker": "^4.1.5",
     "@types/graphql": "^14.5.0",
