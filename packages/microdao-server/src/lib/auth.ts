@@ -2,21 +2,15 @@ import * as jwt from 'jsonwebtoken'
 import { AuthChecker } from 'type-graphql'
 import config from '../config'
 import { Context } from '../context'
-import { AuthenticationError } from '../errors'
-import { UserRole } from '../entities/User'
+import { AuthenticationError } from 'apollo-server-koa'
 
 interface AccessTokenPayload {
   sub: string
-  roles: string[]
-  refreshTokenID: string
+  aud: string
 }
 
 interface RefreshTokenPayload {
   sub: string
-}
-
-enum Roles {
-  ADMIN = 'ADMIN',
 }
 
 const generateAccessToken = (payload: AccessTokenPayload): string =>
@@ -48,31 +42,14 @@ function authenticateRequest(request): AccessTokenPayload | null {
     const accessToken = parts[1]
     return verifyAccessToken(accessToken) as AccessTokenPayload
   } catch (err) {
-    throw new AuthenticationError()
+    throw new AuthenticationError('invalid authorization header')
   }
 }
 
-const authChecker: AuthChecker<Context, UserRole> = (
-  { context: { userID, userRoles } },
-  roles,
+const authChecker: AuthChecker<Context> = (
+  { context: { userAddress } },
 ) => {
-  if (roles.length === 0) {
-    // if `@Authorized()`, check only is user exist
-    return userID != null // eslint-disable-line eqeqeq
-  }
-  // there are some roles defined now
-
-  if (!userID) {
-    // and if no user, restrict access
-    return false
-  }
-  if (userRoles.some(role => roles.includes(role))) {
-    // grant access if the roles overlap
-    return true
-  }
-
-  // no roles matched, restrict access
-  return false
+  return userAddress != null // eslint-disable-line eqeqeq
 }
 
 export {
@@ -82,5 +59,4 @@ export {
   verifyRefreshToken,
   authenticateRequest,
   authChecker,
-  Roles,
 }

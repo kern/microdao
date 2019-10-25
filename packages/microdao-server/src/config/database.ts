@@ -4,7 +4,7 @@ const config = {
   port: process.env.TYPEORM_PORT || 5432,
   username: process.env.TYPEORM_USERNAME || 'root',
   password: process.env.TYPEORM_PASSWORD || 'password',
-  database: process.env.TYPEORM_DATABASE || 'postgres',
+  database: process.env.TYPEORM_DATABASE || 'microdao',
   synchronize: process.env.TYPEORM_SYNCHRONIZE || true,
   logging: process.env.TYPEORM_LOGGING || false,
   entities: process.env.TYPEORM_ENTITIES

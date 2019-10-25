@@ -10,12 +10,15 @@ import {
 } from 'typeorm'
 import { Lazy } from '../utils'
 import BaseEntity from './base/BaseEntity'
-
-export type UserRole = 'ADMIN' // in the future, other roles will be added
+import { Network } from './Network'
 
 @Entity('users')
 @ObjectType()
 export class User extends BaseEntity {
+  @Column({ name: 'network' })
+  @Field(() => Network)
+  network: Network
+
   @Column({ name: 'address' })
   @Field(() => String)
   address: string
