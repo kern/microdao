@@ -19,7 +19,7 @@
     "redis": "^2.8.0",
     "reflect-metadata": "^0.1.13",
     "stoppable": "^1.1.0",
-    "type-graphql": "^0.17.5",
+    "type-graphql": "^0.17.6",
     "typeorm": "^0.2.20",
     "util-promisifyall": "^1.0.6",
     "uuid": "^3.3.3"
